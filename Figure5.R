@@ -1,6 +1,6 @@
-# last edited 29 Sep 2023
-# last run 29 Sep 2023
-# Objective: get Figure5
+# last edited 16 Feb 2024
+# last run 16 Feb 2024
+# Objective: get figures for survey-weighted and stratified results
 
 rm(list=ls())
 
@@ -10,130 +10,207 @@ library(survey) #allows for design based analysis
 library(RColorBrewer)
 library(forcats)
 library(tidyverse)
-library(data.table)
-
+library(scales)
 library(stringr)
 library(cowplot)
 library(gridGraphics)
 library(gridExtra)
+library(reshape2)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 # date = substr(date(),5,10)
-date <- "Sep 29"
+date = "Jun 26"
+# svy.date <- "Jul 21" 
+# svy.strat.date <- "Jul 21" 
 location <- "/Users/EWilson/Desktop/DAC/Delivery"
-# setwd(location)
+setwd(location)
 
-########################################################### GET DATA FILES
-data_master <- read.csv(paste0(location,"/Results/",date,"_data_country_cascade.svy.csv"))
-
+########################################################### FIGURE 3 - Equiplots - MMR
 # read in obstetric transition values
 MMR <- read.csv(paste0(location,"/ReadyforAnalysis_2022-10-26.csv"))
 MMR <- MMR[,c("country","mmr")]
-head(data_master)
+# head(data_master)
 head(MMR)
 
-dim(data_master)
-data_master <- merge(data_master,MMR,by=c("country"))
-dim(data_master)
+svydatastrata <- read_csv(paste0(location,"/Results/",date,"_data.strat.svy.csv"))
+svydatastrata$level[svydatastrata$covariate=="education" & svydatastrata$level=="none"] <- "pre-primary or none"
+
+dim(svydatastrata)
+svydatastrata <- merge(svydatastrata,MMR,by=c("country"))
+dim(svydatastrata)
 
 # add stage of obstetric transition
-data_master$mmr <- as.numeric(data_master$mmr)
+svydatastrata$mmr <- as.numeric(svydatastrata$mmr)
 
-data_master$stage[data_master$mmr>=700]<-1
-data_master$stage[data_master$mmr>=300 & data_master$mmr<700]<-2
-data_master$stage[data_master$mmr>=100 & data_master$mmr<300]<-3
-data_master$stage[data_master$mmr>=20 & data_master$mmr<100]<-4
-data_master$stage[data_master$mmr<20]<-5
+svydatastrata$stage[svydatastrata$mmr>=700]<-1
+svydatastrata$stage[svydatastrata$mmr>=300 & svydatastrata$mmr<700]<-2
+svydatastrata$stage[svydatastrata$mmr>=100 & svydatastrata$mmr<300]<-3
+svydatastrata$stage[svydatastrata$mmr>=20 & svydatastrata$mmr<100]<-4
+svydatastrata$stage[svydatastrata$mmr<20]<-5
+
+data <- subset(svydatastrata, indicator %in% c("score"))
+data <- data %>% filter(covariate!="wealth" | (covariate=="wealth" & level %in% c("1","5")))
+data$level[data$covariate=="wealth" & data$level=="1"] <- "lowest"
+data$level[data$covariate=="wealth" & data$level=="5"] <- "highest"
+
+head(data)
+
+# scale score to a proportion
+data$value <- data$value*20
+
+data2 <- data %>%
+  group_by(country,indicator,covariate) %>%
+  summarise(
+    max = max(value, na.rm = T),
+    min = min(value, na.rm = T)
+  ) %>%
+  arrange(country)
+data2$diff <- data2$max - data2$min
+head(data2)
+
+dim(data)
+data <- merge(data,data2,by=c("country","indicator","covariate"))
+dim(data)
+unique(data$covariate)
+
+
+# average gap by MMR for discussion of how they compare
+data_for_gap <- data[,c("country","level","value","mmr","stage")]
+
+data_for_gap_wide = data_for_gap %>% spread(level,value)
+data_for_gap_wide$diff <- abs(data_for_gap_wide$`lowest` - data_for_gap_wide$`highest`)
+
+data_for_gap_avg <- data_for_gap_wide %>% group_by(stage) %>% 
+  summarize(Mean = mean(diff, na.rm=TRUE))
+
+data_for_gap_avg
 
 
 
-########################################################### COUNTRY CASCADE - FIGURE 5
-# plot cascade by obstetric transition stage
-data_master$mmr <- as.numeric(data_master$mmr)
-data_master <- subset(data_master, !is.na(mmr))
-data_master$country[data_master$country=="CentralAfricanRepublic"] <- "CAR"
-data_master$country[data_master$country=="DominicanRepublic"] <- "DR"
-data_master$country[data_master$country=="NorthMacedonia"] <- "N.Macedonia"
-
-dim(data_master)
+getPalette = colorRampPalette(brewer.pal(11, "RdYlGn"))
 
 wrapper <- function(x, ...) 
 {
   paste(strwrap(x, ...), collapse = "\n")
 }
 
-# mycolors = c("gray","plum1","purple2","lightgreen","darkgreen")
-mycolors = c("plum1","purple2","lightgreen","darkgreen")
+# reformat names so same scale
+data$country[data$country %in% "CentralAfricanRepublic"] <- "CAR"
+data$country[data$country %in% "DominicanRepublic"] <- "DR"
 
-cascades = list()
 
-plot_titles <- c("(A) MMR: >=700","(B) MMR: 300-699","(C) MMR: 100-299"," (D) MMR: 20-99","(E) MMR: <20")
 
-for(i in 1:length(sort(unique(data_master$stage)))){
-  data <- subset(data_master, stage == sort(unique(data_master$stage))[i] )
+j = 1
+subj <- subset(data, data$covariate == 'wealth')
 
-  head(data)
-  
-  data$use.this[data$indicator=='hf'] <-1
-  data$use.this[data$indicator=='hf_sba'] <-2
-  data$use.this[data$indicator=='hf_sba_24hr'] <-3
-  data$use.this[data$indicator=='hf_sba_24hr_check'] <-4
-  
-  data$indicator <- factor(data$indicator, levels = unique(data$indicator[order(data$use.this)]))
-  
-  head(data)
-  
-  if(i>1){ytitle = c("")
-  }
-  if(i==1){ytitle = c("proportion of sample population")}
+my.title <- c("MMR: >=700\n mean gap: 44pp")
 
-  cascade <- ggplot(data, aes(x=reorder(country, value), y=value, fill=indicator)) +
-    geom_bar(position="dodge", stat = "identity") +
-    scale_y_continuous(limits=c(0,1),breaks=c(0,0.2,0.4,0.6,0.8,1)) +
-    ylim(0,1) +
-    xlab("") +
+  sub <- subset(subj, subj$stage == 1)
+  mmr1 <- ggplot(sub, aes(x=reorder(country,-diff), y=value)) +
+    geom_line(aes(group=country))+
+    geom_point(size=4, aes(color = level)) +
+    labs(tag = "(A)",x= "", y = "delivery care coverage %") +
+    ggtitle(my.title) +
+    ylim(0,100) +
+    scale_colour_manual(values=c('darkblue','gold')) +
     theme_bw() +
-    ylab(ytitle) +
-    ggtitle(plot_titles[i]) +
-    labs(col="") +
-    scale_fill_manual(values=mycolors) +
-    scale_fill_manual(values=mycolors, labels=str_wrap(c("facility delivery","+ attendant","+ 24hr+ stay","+ health check within 2d"),width=20)) +
-    scale_colour_manual(values=mycolors) +
-    theme(axis.text.x = element_text(size = 6.5, angle = 90, vjust = 1, hjust=1),
-          axis.title=element_text(size=9),
-          plot.title = element_text(vjust = -1.5, size = 8.4),
-          legend.text=element_text(size=6.5),
-          legend.title=element_text(size=6.5)) +
-    if(i==1){theme(plot.margin=margin(l=0.5,unit="cm"),
-                   legend.position = "none")}
-    else{theme(plot.margin=margin(l=-0.2,unit="cm"))} +
-    if(i>1){theme(axis.text.y=element_blank(),
-                   axis.ticks.y=element_blank())} +
-    if(i<5){theme(legend.position = "none")}
+    theme(text = element_text(size=12), 
+          plot.tag.position = c(0.18,.99),
+          axis.text.x = element_text(size = 12, angle = 90, vjust = 0.5, hjust=1),
+          axis.text.y = element_text(size = 12),
+          plot.title = element_text(hjust = .14, size = 11),
+          axis.title.y=element_text(size = 16),
+          legend.position = "none") 
+  mmr1
   
-  cascades[[i]] <- cascade
-}
+  
+my.title <- c("MMR: 300-699\n mean gap: 34pp")
+  
+  sub <- subset(subj, subj$stage == 2)
+  mmr2 <- ggplot(sub, aes(x=reorder(country,-diff), y=value)) +
+    geom_line(aes(group=country))+
+    geom_point(size=4, aes(color = level)) +
+    labs(tag = "(B)",x= "", y = "") +
+    ggtitle(my.title) +
+    ylim(0,100) +
+    scale_colour_manual(values=c('darkblue','gold')) +
+    theme_bw() +
+    theme(plot.tag.position = c(0.15,.99),
+          axis.text.x = element_text(size = 12, angle = 90, vjust = 0.5, hjust=1),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.title = element_text(hjust =.25, size = 11),
+          legend.position = "none") +
+    theme(plot.margin=margin(l=-0.4,unit="cm"))
+  mmr2
 
-# cascades[[1]]
-# 
-# legend_cascade <- get_legend(cascades[[1]])
+  
+my.title <- c("MMR: 100-299\n mean gap: 33pp")
+  
+  sub <- subset(subj, subj$stage == 3)
+  mmr3 <- ggplot(sub, aes(x=reorder(country,-diff), y=value)) +
+    geom_line(aes(group=country))+
+    geom_point(size=4, aes(color = level)) +
+    labs(tag = "(C)",x= "", y = "") +
+    ggtitle(my.title) +
+    ylim(0,100) +
+    scale_colour_manual(values=c('darkblue','gold')) +
+    theme_bw() +
+    theme(plot.tag.position = c(0.15,.99),
+          axis.text.x = element_text(size = 12, angle = 90, vjust = 0.5, hjust=1),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.title = element_text(hjust =.25, size = 11),
+          legend.position = "none") +
+    theme(plot.margin=margin(l=-0.3,unit="cm"))
+  mmr3
+  
+  
+my.title <- c("MMR: 20-99\n  mean gap: 11pp")
 
-# and replot suppressing the legend
-# cascade_1 <- cascades[[1]] + theme(legend.position='none')
+  sub <- subset(subj, subj$stage == 4)
+  mmr4 <- ggplot(sub, aes(x=reorder(country,-diff), y=value)) +
+    geom_line(aes(group=country))+
+    geom_point(size=4, aes(color = level)) +
+    labs(tag = "(D)",x= "", y = "") +
+    ggtitle(my.title) +
+    ylim(0,100) +
+    scale_colour_manual(values=c('darkblue','gold')) +
+    theme_bw() +
+    theme(plot.tag.position = c(0.15,.99),
+          axis.text.x = element_text(size = 12, angle = 90, vjust = 0.5, hjust=1),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.title = element_text(hjust = .25, size = 11),
+          legend.position = "none") +
+    theme(plot.margin=margin(l=-0.3,unit="cm"))
+  mmr4
 
+  # sub$covariate <- "wealth quintile"
+  
+my.title <- c("MMR: <20\n      mean gap: 5pp")
+  
+  sub <- subset(subj, subj$stage == 5)
+  mmr5 <- ggplot(sub, aes(x=reorder(country,-diff), y=value)) +
+    geom_line(aes(group=country))+
+    geom_point(size=4, aes(color = level)) +
+    labs(tag = "(E)",x= "", y = "") +
+    ggtitle(my.title) +
+    ylim(0,100) +
+    scale_colour_manual(values=c('darkblue','gold')) +
+    theme_bw() +
+    theme(plot.tag.position = c(0.12,.99),
+          axis.text.x = element_text(size = 12, angle = 90, vjust = 0.5, hjust=1),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          plot.title = element_text(hjust = .45, size = 11)) +
+    theme(plot.margin=margin(l=-0.3,unit="cm")) +
+    guides(color = guide_legend(title = "wealth quintile",labels=c("highest quintile","lowest quintile")))
+  
+  mmr5
 
-# cascade_facet <- plot_grid(cascade_1,cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],legend_cascade,nrow=1,align='hv',rel_widths = c(.7,1.2,1.2,1.2,.4,.4)) +
-cascade_facet <- plot_grid(cascades[[1]],cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],nrow=1,align='h',rel_widths = c(.5,1.3,1.1,1.3,1)) +
+  
+
+  mmr <- plot_grid(mmr1,mmr2,mmr3,mmr4,mmr5,ncol=5, align='h',rel_widths = c(.7,1.2,1.1,1,1)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
-ggsave(plot=cascade_facet, height = 5 , width = 13 , paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure5.png"))
-
-
-
-
-
-
-
-
-
-
-
+  ggsave(plot=mmr, height = 7.5 , width = 13 , paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure5.png"))

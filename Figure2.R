@@ -1,5 +1,5 @@
-# last edited 11 Aug 2023
-# last run 11 Aug 2023
+# last edited 16 Feb 2024
+# last run 16 Feb 2024
 # Objective: get Figure2
 
 rm(list=ls())
@@ -28,21 +28,23 @@ setwd(location)
 ########################################################### GET DATA FILES - survey-weighted estimates
 svydata <- read_csv(paste0(location,"/Results/",date,"_data.svy.csv"))
 
-# svydata <- svydata[!(svydata$country=="SaoTomeandPrincipe"),]
+
+########################################################### FIGURE 2 - Average score by country
+### Horizontal version
+svydata <- svydata[!(svydata$country=="Palestine"),]
 
 head(svydata)
 sort(unique(svydata$country))
 n <- table(svydata$country, svydata$indicator)
 dim(n)
-########################################################### FIGURE 2 - Average score by country
-### Horizontal version
-svydata <- read.csv(paste0(location,"/Results/",date,"_data.svy.csv"), stringsAsFactors = FALSE)
+
 data <- subset(svydata,indicator=="score")
 dim(data)
 head(data)
 
-data$new.var = factor(data$country, levels=data[order(data$value, decreasing = TRUE), "country"])
-# View(data)
+# data$new.var = factor(data$country, levels=data[order(data$value, decreasing = TRUE), "country"])
+data$new.var <- factor(data$country, levels = data$country[order(data$value, decreasing = TRUE)])
+
 data$value <- round(data$value,3)
 head(data)
 
@@ -62,11 +64,11 @@ plot_partA <- ggplot(data=data, aes(x=new.var,y=value)) +
         plot.tag.position = c(0.01,.99),
         panel.grid.major.x = element_blank() ,
         axis.ticks.x=element_blank(),
-        axis.text.x = element_text(size=9, angle=90),
-        axis.text.y = element_text(size=9)) +
+        axis.text.x = element_text(size=10, angle=90),
+        axis.text.y = element_text(size=12)) +
   scale_y_continuous(breaks = c(0,20,40,60,80,100))+
   xlab("") +
-  ylab("quality delivery score %")
+  ylab("delivery care coverage %")
 plot_partA
 # ggsave(plot=plot_partA, height = 7 , width = 10 , "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure2a.png")
 
@@ -98,7 +100,7 @@ quantile(data$value)
 IQR(data$value)
 
 # Fig2 <- ggdraw(plot_grid(plot_partA, plot_partB, nrow=1, rel_widths = c(4,1)))
-Fig2 <- plot_grid(plot_partA, plot_partB, align="hv", rel_widths=c(4,1))
+Fig2 <- plot_grid(plot_partA, plot_partB, align="hv", rel_widths=c(5,1))
 Fig2
 ggsave(plot=Fig2, height = 7 , width = 14 , "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure2.png")
 

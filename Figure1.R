@@ -1,5 +1,5 @@
-# last edited 20 July 2023
-# last run 20 July 2023
+# last edited 16 Feb 2024
+# last run 16 Feb 2024
 # Objective: get Figure1
 
 rm(list=ls())
@@ -31,7 +31,7 @@ svydata_pooled <- read_csv(paste0(location,"/Results/Sep 17_pooled_standard_data
 names(svydata_pooled)[names(svydata_pooled)=="level"] <- "country"
 svydata <- rbind(svydata,svydata_pooled)
 
-# svydata <- svydata[!(svydata$country=="SaoTomeandPrincipe"),]
+svydata <- svydata[!(svydata$country=="Palestine"),] # no MMR estimate from 2017
 
 head(svydata)
 sort(unique(svydata$country))
@@ -92,10 +92,10 @@ graph_facility <- ggplot() +
   theme( # axis.ticks.y = element_blank(),axis.text.y = element_blank(), # get rid of y ticks/text
           text = element_text(size=12),     
           plot.tag.position = c(0.17,.99),
-          axis.title.y=element_text(size=15),
-          axis.text.y = element_text(size=12),
-          axis.text.x = element_text(size=9, vjust=.5),
-          plot.title = element_text(hjust = 0.5, size = 12)) +
+          axis.title.y=element_text(size=16),
+          axis.text.y = element_text(size=14),
+          axis.text.x = element_text(size=10, vjust=.5),
+          plot.title = element_text(hjust = 0.5, size = 14)) +
   scale_x_discrete(labels=str_wrap(c("home","lower-level","hospital","facility delivery"),width=11))  +
   scale_fill_manual(values=mycolors) +
   scale_colour_manual(values=mycolors) +
@@ -106,7 +106,10 @@ graph_facility
 df1_1 <- df1[df1$indicator %in% c("sba","sbaORideliv","ideliv24hr","pncwm") & df1$country!="pooled standard",]
 df1_2 <- df1[df1$indicator %in% c("sba","sbaORideliv","ideliv24hr","pncwm") & df1$country=="pooled standard",]
 
-my.title <- c("Contact Indicators\n")
+my.title <- c("Contact indicators\n")
+
+my.labels <- c("skilled \nattendent", "skilled attendent \nOR facility delivery", "24hr+ \nstay","health check 2d")
+
 mycolors = c("purple2","purple4","lightgreen","darkgreen")
 graph_indicator <- ggplot() +
   geom_point(data=df1_1,aes(x=indicator,y=value),position=position_jitter(width=0.1, height=0.1)) +
@@ -124,9 +127,10 @@ graph_indicator <- ggplot() +
         plot.tag.position = c(0.05,.99),
         axis.ticks.y = element_blank(),axis.text.y = element_blank(), # get rid of y ticks/text
         axis.title.y=element_blank(), # remove x axis label
-        axis.text.x = element_text(size=8, vjust=.5),
-        plot.title = element_text(hjust = 0.5, size = 12)) +
-  scale_x_discrete(labels = str_wrap(c("skilled attendent", "skilled attendent OR facility delivery", "24hr+ stay","health check 2d"), width = 21)) +
+        axis.text.x = element_text(size=10, vjust=.5),
+        plot.title = element_text(hjust = 0.5, size = 14)) +
+#  scale_x_discrete(labels = str_wrap(c("skilled attendent", "skilled attendent OR facility delivery", "24hr+ stay","health check 2d"), width = 21)) +
+  scale_x_discrete(labels= my.labels) +
   scale_fill_manual(values=mycolors) +
   scale_colour_manual(values=mycolors) +
   theme(legend.position = "none")
@@ -137,7 +141,7 @@ df1_1 <- df1[df1$indicator %in% c("score0","score1","score2","score3","score4","
 df1_2 <- df1[df1$indicator %in% c("score0","score1","score2","score3","score4","score5") & df1$country=="pooled standard",]
 
 my.labels <- c("\n0", "\n1","\n2","\n3","\n4","\n5")
-my.title <- c("Quality delivery score\n")
+my.title <- c("Delivery care score\n")
 mycolors = c(brewer.pal(name="YlOrRd", n = 7))
 graph_score <- ggplot() +
   geom_point(data=df1_1,aes(x=indicator,y=value),position=position_jitter(width=0.1, height=0.1)) +
@@ -155,11 +159,11 @@ graph_score <- ggplot() +
         plot.tag.position = c(0.05,.99),
         axis.ticks.y = element_blank(),axis.text.y = element_blank(), # get rid of y ticks/text
         axis.title.y=element_blank(), # remove x axis label
-        axis.text.x = element_text(size=9, vjust=.5),
-        plot.title = element_text(hjust = 0.5, size = 12)) +
+        axis.text.x = element_text(size=10, vjust=.5),
+        plot.title = element_text(hjust = 0.5, size = 14)) +
 #  scale_x_discrete(labels = str_wrap(c("0","1","2","3","4","5"),width=0)) +
   scale_x_discrete(labels= my.labels) +
-   scale_fill_manual(values=rev(mycolors)) +
+  scale_fill_manual(values=rev(mycolors)) +
   scale_colour_manual(values=rev(mycolors)) +
   theme(legend.position = "none")
 graph_score 
@@ -169,8 +173,9 @@ df1_1 <- df1[df1$indicator %in% c("score") & df1$country!="pooled standard",]
 df1_2 <- df1[df1$indicator %in% c("score") & df1$country=="pooled standard",]
 
 mycolors = c("grey")
-head(df1)
-graph_q_indicator <- ggplot() +
+head(df1_1)
+head(df1_2)
+graph_wt_scaled_score <- ggplot() +
   geom_point(data=df1_1,aes(x=indicator,y=value),position=position_jitter(width=0.1, height=0.1)) +
   geom_bar(data=df1_2,aes(x=indicator,y=value,fill=indicator),
            position="dodge", stat="identity", alpha=0.65) +
@@ -178,25 +183,25 @@ graph_q_indicator <- ggplot() +
   scale_y_continuous(limits=c(0,100),breaks=c(0,20,40,60,80,100)) +
   xlab("") +
   ylab("") +
-  ggtitle(wrapper("Quality indicator", width=6)) +
+  ggtitle(wrapper("Delivery Care", width=6)) +
   labs(col="") +
   theme_bw() +
   theme(text = element_text(size=12),
         plot.tag.position = c(0.05,.99),
         axis.ticks.y = element_blank(),axis.text.y = element_blank(), # get rid of y ticks/text
         axis.title.y=element_blank(), # remove x axis label
-        axis.text.x = element_text(size=9, vjust=.5),
-        plot.title = element_text(hjust = 0.5, size = 12)) +
-  scale_x_discrete(labels = str_wrap(c("quality delivery"), width = 12)) +
+        axis.text.x = element_text(size=10, vjust=.5),
+        plot.title = element_text(hjust = 0.5, size = 14)) +
+  scale_x_discrete(labels = str_wrap(c("co-coverage"), width = 12)) +
   scale_fill_manual(values=mycolors) +
   scale_colour_manual(values=mycolors) +
   theme(legend.position = "none")
-graph_q_indicator
+graph_wt_scaled_score
 
 
 
 
-Fig1 <- ggdraw(plot_grid(plot_grid(graph_facility, graph_indicator, graph_score, graph_q_indicator, nrow=1, rel_widths = c(1,1,1,.32))))
+Fig1 <- ggdraw(plot_grid(plot_grid(graph_facility, graph_indicator, graph_score, graph_wt_scaled_score, nrow=1, rel_widths = c(1,1,1,.4))))
 ggsave(plot=Fig1, height = 7 , width = 14 , "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure1.png")
 
 

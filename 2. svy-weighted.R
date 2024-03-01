@@ -312,7 +312,8 @@ data_master$stage[data_master$mmr<20]<-5
 
 data_master <- subset(data_master, !is.na(stage))
 unique(data_master$country)
-data_master <- subset(data_master, !is.na(ideliv))
+table(data_master$ideliv, exclude=NULL) 
+# data_master <- subset(data_master, !is.na(ideliv))
 data_master$pop <- 1
 
 # count n for each country
@@ -341,80 +342,6 @@ all_data$v001 <- 1
 
 all_data$pooled_strata <- paste0(all_data$num, all_data$v023)
 all_data$pooled_caseid <- paste0(all_data$num, all_data$caseid)
-
-
-function(){
-
-
-# POOLED VALUE FOR EACH INDICATOR
-indiclist_std_all = list()
-datalist = list()
-indicators <- c("faclevel0","faclevel1","faclevel2","ideliv","sba","sbaORideliv","ideliv24hr","pncwm","score0","score1","score2","score3","score4","score5","score")
-
-# FIGURE 1 POOLED AVERAGE
-data <- all_data
-head(data)
-dim(data)
-
-svydata <- svydesign(id=~pooled_caseid,strata=~pooled_strata, data=data, weights=~adj_sw, nest=TRUE) # including strata affects standard error only, not estimate
-
-for(i in 1:length(indicators)){
-  denom <- sum(table(data[[indicators[i]]]))
-  indic <-svyby(make.formula(indicators[i]), ~v001 ,svydata, svymean, na.rm=TRUE) 
-  indic$n <- denom
-  indic$CIL <- indic[,2] - 1.96*indic[,3]
-  indic$CIU <- indic[,2] + 1.96*indic[,3]
-  
-  indic$indicator <- indicators[i]
-  indic$level <- "pooled standard"
-  names(indic)[names(indic) == indicators[i]] <- 'value'
-  indic <- indic[,c("indicator","n","level","value","se","CIL","CIU")]
-  
-  print(indic)
-  indiclist_std_all[[i]] <- indic
-}
-
-pooled_standard_svy_combined = do.call(rbind, indiclist_std_all)
-pooled_standard_svy_combined
-write.csv(pooled_standard_svy_combined,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_pooled_standard_data.svy.csv"), row.names = FALSE)
-
-########## raw rates for pooled data - why are weighted lower-level and hospital numbers the same even though there are more hospital births by raw numbers
-fac0 <- subset(data, faclevel==0)
-fac1 <- subset(data, faclevel==1)
-fac2 <- subset(data, faclevel==2)
-summary(fac0$adj_sw)
-summary(fac1$adj_sw)
-summary(fac2$adj_sw)
-
-country_faclevel <- as.data.frame.matrix(table(data$country, data$faclevel))
-country_faclevel$country <- row.names(country_faclevel)
-all_data_collapse <- as.data.frame(all_data %>% group_by(country,prop_pooled) %>% summarise(n = n()))
-country_faclevel_prop <- merge(country_faclevel, all_data_collapse, by=c("country"))
-head(country_faclevel_prop)
-write.csv(country_faclevel_prop,"/Users/EWilson/Desktop/DAC/Delivery/Results/country_faclevel_prop.csv", row.names = FALSE)
-
-svydata <- svydesign(id=~pooled_caseid,strata=~pooled_strata, data=data, weights=~v001, nest=TRUE) # including strata affects standard error only, not estimate
-
-for(i in 1:length(indicators)){
-  denom <- sum(table(data[[indicators[i]]]))
-  indic <-svyby(make.formula(indicators[i]), ~v001 ,svydata, svymean, na.rm=TRUE) 
-  indic$n <- denom
-  indic$CIL <- indic[,2] - 1.96*indic[,3]
-  indic$CIU <- indic[,2] + 1.96*indic[,3]
-  
-  indic$indicator <- indicators[i]
-  indic$level <- "pooled standard"
-  names(indic)[names(indic) == indicators[i]] <- 'value'
-  indic <- indic[,c("indicator","n","level","value","se","CIL","CIU")]
-  
-  print(indic)
-  indiclist_std_all[[i]] <- indic
-}
-pooled_standard_raw_combined = do.call(rbind, indiclist_std_all)
-write.csv(pooled_standard_raw_combined,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_pooled_standard_data.raw.csv"), row.names = FALSE)
-
-}
-
 
 
 
@@ -565,7 +492,7 @@ pooled_svy_faclevel2
 
 
 
-###################################### MMR FIGURE 4
+###################################### FIGURE 4
 indiclist_stage = list()
 datalist = list()
 indicators <- c("hf","hf_sba","hf_sba_24hr","hf_sba_24hr_check")
@@ -642,6 +569,82 @@ Run.time
 
 
 
+
+
+# MOVED FROM LINE 347
+
+function(){
+  
+  
+  # POOLED VALUE FOR EACH INDICATOR
+  indiclist_std_all = list()
+  datalist = list()
+  indicators <- c("faclevel0","faclevel1","faclevel2","ideliv","sba","sbaORideliv","ideliv24hr","pncwm","score0","score1","score2","score3","score4","score5","score")
+  
+  # FIGURE 1 POOLED AVERAGE
+  data <- all_data
+  head(data)
+  dim(data)
+  
+  svydata <- svydesign(id=~pooled_caseid,strata=~pooled_strata, data=data, weights=~adj_sw, nest=TRUE) # including strata affects standard error only, not estimate
+  
+  for(i in 1:length(indicators)){
+    denom <- sum(table(data[[indicators[i]]]))
+    indic <-svyby(make.formula(indicators[i]), ~v001 ,svydata, svymean, na.rm=TRUE) 
+    indic$n <- denom
+    indic$CIL <- indic[,2] - 1.96*indic[,3]
+    indic$CIU <- indic[,2] + 1.96*indic[,3]
+    
+    indic$indicator <- indicators[i]
+    indic$level <- "pooled standard"
+    names(indic)[names(indic) == indicators[i]] <- 'value'
+    indic <- indic[,c("indicator","n","level","value","se","CIL","CIU")]
+    
+    print(indic)
+    indiclist_std_all[[i]] <- indic
+  }
+  
+  pooled_standard_svy_combined = do.call(rbind, indiclist_std_all)
+  pooled_standard_svy_combined
+  write.csv(pooled_standard_svy_combined,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_pooled_standard_data.svy.csv"), row.names = FALSE)
+  
+  
+  ########## raw rates for pooled data - why are weighted lower-level and hospital numbers the same even though there are more hospital births by raw numbers
+  fac0 <- subset(data, faclevel==0)
+  fac1 <- subset(data, faclevel==1)
+  fac2 <- subset(data, faclevel==2)
+  summary(fac0$adj_sw)
+  summary(fac1$adj_sw)
+  summary(fac2$adj_sw)
+  
+  country_faclevel <- as.data.frame.matrix(table(data$country, data$faclevel))
+  country_faclevel$country <- row.names(country_faclevel)
+  all_data_collapse <- as.data.frame(all_data %>% group_by(country,prop_pooled) %>% summarise(n = n()))
+  country_faclevel_prop <- merge(country_faclevel, all_data_collapse, by=c("country"))
+  head(country_faclevel_prop)
+  write.csv(country_faclevel_prop,"/Users/EWilson/Desktop/DAC/Delivery/Results/country_faclevel_prop.csv", row.names = FALSE)
+  
+  svydata <- svydesign(id=~pooled_caseid,strata=~pooled_strata, data=data, weights=~v001, nest=TRUE) # including strata affects standard error only, not estimate
+  
+  for(i in 1:length(indicators)){
+    denom <- sum(table(data[[indicators[i]]]))
+    indic <-svyby(make.formula(indicators[i]), ~v001 ,svydata, svymean, na.rm=TRUE) 
+    indic$n <- denom
+    indic$CIL <- indic[,2] - 1.96*indic[,3]
+    indic$CIU <- indic[,2] + 1.96*indic[,3]
+    
+    indic$indicator <- indicators[i]
+    indic$level <- "pooled standard"
+    names(indic)[names(indic) == indicators[i]] <- 'value'
+    indic <- indic[,c("indicator","n","level","value","se","CIL","CIU")]
+    
+    print(indic)
+    indiclist_std_all[[i]] <- indic
+  }
+  pooled_standard_raw_combined = do.call(rbind, indiclist_std_all)
+  write.csv(pooled_standard_raw_combined,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_pooled_standard_data.raw.csv"), row.names = FALSE)
+  
+}
 
 
 

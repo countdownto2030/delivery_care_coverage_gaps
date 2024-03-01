@@ -1,5 +1,5 @@
-# last edited 29 Sep 2023
-# last run 29 Sep 2023
+# last edited 16 Feb 2024
+# last run 16 Feb 2024
 # Objective: get Figure4
 
 rm(list=ls())
@@ -24,7 +24,9 @@ location <- "/Users/EWilson/Desktop/DAC/Delivery"
 # setwd(location)
 
 ########################################################### GET DATA FILES
-data_master <- read.csv(paste0(location,"/Results/Sep 29_pooled_data.svy.csv"))
+# data_master <- read.csv(paste0(location,"/Results/Sep 29_pooled_data.svy.csv"))
+data_master <- read.csv(paste0(location,"/Results/Mar  1_pooled_data.svy.csv"))
+
 head(data_master)
 
 data_sums <- subset(data_master, level %in% c("stage_1","stage_2","stage_3","stage_4","stage_5"))
@@ -78,25 +80,29 @@ for(i in 1:length(sort(unique(data_sums$level)))){
     ytitle = c("")
   }
   if(i==1){mycolors = c("grey","plum1","purple2","lightgreen","darkgreen") 
-  ytitle = c("proportion of sample population")}
+  ytitle = c("percentage of sample population")}
   print(data)
   print(mycolors)
-  
+  data$value <- data$value*100
   cascade <- ggplot(data, aes(x = reorder(indicator, -value),y= value, fill=indicator)) +
     geom_bar(position="dodge", stat = "identity") +
-    geom_text(aes(label=round(value,2)), position=position_dodge(width=0.9), vjust=-0.25) +
+    # geom_text(aes(label=round(value,2)), position=position_dodge(width=0.9), vjust=-0.25) +
+    geom_text(aes(label=round(value,0)), position=position_dodge(width=0.9), vjust=-0.25) +
     # labs(tag = labels[i]) +
-    scale_y_continuous(limits=c(0,1),breaks=c(0,0.2,0.4,0.6,0.8,1)) +
+    scale_y_continuous(limits=c(0,100),breaks=c(0,20,40,60,80,100)) +
     xlab("") +
     ylab(ytitle) +
     ggtitle(plot_titles[i]) +
     labs(col="") +
     scale_fill_manual(values=mycolors) +
-    scale_fill_manual(values=mycolors, labels=str_wrap(c("sample n","facility delivery","+ attendant","+ 24hr+ stay","+ health check within 2d"),width=20)) +
+    scale_fill_manual(values=mycolors, labels=str_wrap(c("poplulation","facility delivery","+ attendant","+ 24hr+ stay","+ health check within 2d"),width=20)) +
     scale_colour_manual(values=mycolors) +
     theme_bw() +
     theme(axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) +
+          axis.ticks.x=element_blank(),
+          axis.text.y = element_text(size=12),
+          plot.title = element_text(hjust = 0.5, size = 14),
+          axis.title.y=element_text(size = 16)) +
     if(i!=1){theme(axis.text.y=element_blank(),
                        axis.ticks.y=element_blank(),
                        legend.position = "none")}
@@ -112,7 +118,7 @@ legend_cascade <- get_legend(cascades[[1]])
 # and replot suppressing the legend
 cascade_1 <- cascades[[1]] + theme(legend.position='none')
 
-cascade_facet <- plot_grid(cascade_1,cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],legend_cascade,nrow=1,rel_widths = c(1.2,1,1,1,1,1)) +
+cascade_facet <- plot_grid(cascade_1,cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],legend_cascade,nrow=1,rel_widths = c(1.2,1,1,1,1,.8)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
 ggsave(plot=cascade_facet, height = 7 , width = 13 , paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure4.png"))
 
