@@ -57,8 +57,11 @@ data <- subset(data, country!="Palestine")
 
 table(data$mmr, exclude = NULL)
 data$mmr <- as.numeric(data$mmr)
+data$value <- data$value*20
 
-model_plot <- lm(mmr ~ value, data=data)
+# model_plot <- lm(mmr ~ value, data=data)
+model_plot <- lm(value ~ mmr, data=data)
+model_plot
 fit <- predict(model_plot, interval = "confidence")
 data_plot <- cbind(data,fit)
 summary(model_plot)
@@ -66,14 +69,13 @@ coef(lm(data$mmr~data$value))
 coef(model_plot)
 
 # test <- paste0("y=",round(coef(lm(data$mmr~data$value))[1],3),"x",round(coef(lm(data$mmr~data$value))[2],3))
-test <- paste0(round(coef(lm(data$mmr~data$value))[1],3),"x",round(coef(lm(data$mmr~data$value))[2],3))
+test <- paste0(round(coef(lm(data$mmr~data$value))[2],1),"x + ",round(coef(lm(data$mmr~data$value))[1],1))
 test
 
 RSqAdj <-round(summary(model_plot)$adj.r.squared,3)
 RSqAdj
 
 head(data)
-data$value <- data$value*20
 
 graph_association <- ggplot(data,aes(x=value,y=mmr)) +
   geom_point(size=1, alpha=.5) +

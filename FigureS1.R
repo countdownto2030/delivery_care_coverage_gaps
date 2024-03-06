@@ -1,6 +1,6 @@
 # last edited 16 Feb 2024
 # last run 16 Feb 2024
-# Objective: get Figure5
+# Objective: get supplementary figure 1
 
 rm(list=ls())
 
@@ -68,7 +68,9 @@ mycolors = c("plum1","purple2","lightgreen","darkgreen")
 cascades = list()
 
 # plot_titles <- c("(A) MMR: >=700","(B) MMR: 300-699","(C) MMR: 100-299"," (D) MMR: 20-99","(E) MMR: <20")
-plot_titles <- c("(A)","(B)","(C)"," (D)","(E)")
+plot_titles <- c("(A) MMR:\n >=700","(B)\n MMR: 300-699","(C)\n MMR: 100-299"," (D)\n MMR: 20-99","(E)\n MMR: <20")
+
+# my.title <- c("MMR: >=700\n mean gap: 44pp")
 
 for(i in 1:length(sort(unique(data_master$stage)))){
   data <- subset(data_master, stage == sort(unique(data_master$stage))[i] )
@@ -102,7 +104,7 @@ for(i in 1:length(sort(unique(data_master$stage)))){
     scale_colour_manual(values=mycolors) +
     theme(axis.text.x = element_text(size = 8.5, angle = 90, vjust = .5, hjust=1),
           axis.title=element_text(size=12),
-          plot.title = element_text(vjust = -1.5, size = 12),
+          plot.title = element_text(vjust = -1.5, size = 10),
           legend.text=element_text(size=11),
           legend.title=element_text(size=11)) +
     if(i==1){theme(plot.margin=margin(l=0.5,unit="cm"),

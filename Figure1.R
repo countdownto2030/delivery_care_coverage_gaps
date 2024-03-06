@@ -172,6 +172,7 @@ graph_score
 df1_1 <- df1[df1$indicator %in% c("score") & df1$country!="pooled standard",]
 df1_2 <- df1[df1$indicator %in% c("score") & df1$country=="pooled standard",]
 
+my.labels <- c("\nco-coverage")
 mycolors = c("grey")
 head(df1_1)
 head(df1_2)
@@ -183,7 +184,7 @@ graph_wt_scaled_score <- ggplot() +
   scale_y_continuous(limits=c(0,100),breaks=c(0,20,40,60,80,100)) +
   xlab("") +
   ylab("") +
-  ggtitle(wrapper("Delivery Care", width=6)) +
+  ggtitle(wrapper("Delivery care", width=6)) +
   labs(col="") +
   theme_bw() +
   theme(text = element_text(size=12),
@@ -192,7 +193,8 @@ graph_wt_scaled_score <- ggplot() +
         axis.title.y=element_blank(), # remove x axis label
         axis.text.x = element_text(size=10, vjust=.5),
         plot.title = element_text(hjust = 0.5, size = 14)) +
-  scale_x_discrete(labels = str_wrap(c("co-coverage"), width = 12)) +
+  # scale_x_discrete(labels = str_wrap(c("co-coverage"), width = 12)) +
+  scale_x_discrete(labels= my.labels) +
   scale_fill_manual(values=mycolors) +
   scale_colour_manual(values=mycolors) +
   theme(legend.position = "none")
