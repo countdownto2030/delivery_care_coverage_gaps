@@ -1,5 +1,5 @@
-# last edited 16 Feb 2024
-# last run 16 Feb 2024
+# last edited 13 May 2024
+# last run 13 May 2024
 # Objective: get figures for survey-weighted and stratified results
 
 rm(list=ls())
@@ -19,7 +19,7 @@ library(reshape2)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 # date = substr(date(),5,10)
-date = "Jun 26"
+date = "May 13"
 # svy.date <- "Jul 21" 
 # svy.strat.date <- "Jul 21" 
 location <- "/Users/EWilson/Desktop/DAC/Delivery"
@@ -247,4 +247,4 @@ mmr5
 
 mmr <- plot_grid(mmr1,mmr2,mmr3,mmr4,mmr5,ncol=5, align='h',rel_widths = c(.8,1.2,1.1,1,1.25)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
-ggsave(plot=mmr, height = 7 , width = 13 , paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS2.png"))
+ggsave(plot=mmr, height = 7, width = 13, dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS2.png"))

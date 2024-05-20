@@ -1,5 +1,5 @@
-# last edited 16 Feb 2024
-# last run 16 Feb 2024
+# last edited 13 May 2024
+# last run 13 May 2024
 # Objective: get Figure1
 
 rm(list=ls())
@@ -19,7 +19,7 @@ library(reshape2)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 # date = substr(date(),5,10)
-date = "Jun 26"
+date = "May 13"
 # svy.date <- "Jul 21" 
 # svy.strat.date <- "Jul 21" 
 location <- "/Users/EWilson/Desktop/DAC/Delivery"
@@ -27,7 +27,7 @@ setwd(location)
 
 ########################################################### GET DATA FILES - survey-weighted estimates
 svydata <- read_csv(paste0(location,"/Results/",date,"_data.svy.csv"))
-svydata_pooled <- read_csv(paste0(location,"/Results/Sep 17_pooled_standard_data.svy.csv"))
+svydata_pooled <- read_csv(paste0(location,"/Results/May 13_pooled_standard_data.svy.csv"))
 names(svydata_pooled)[names(svydata_pooled)=="level"] <- "country"
 svydata <- rbind(svydata,svydata_pooled)
 
@@ -204,7 +204,7 @@ graph_wt_scaled_score
 
 
 Fig1 <- ggdraw(plot_grid(plot_grid(graph_facility, graph_indicator, graph_score, graph_wt_scaled_score, nrow=1, rel_widths = c(1,1,1,.4))))
-ggsave(plot=Fig1, height = 7 , width = 14 , "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure1.png")
+ggsave(plot=Fig1, height = 7 , width = 14, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure1.png")
 
 
 

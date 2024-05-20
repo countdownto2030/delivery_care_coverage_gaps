@@ -1,5 +1,5 @@
-# last edited 29 Sep 2023
-# last run 29 Sep 2023
+# last edited 13 May 2024
+# last run 13 May 2024
 # Objective: get data files for survey-weighted and stratified results
 
 rm(list=ls())
@@ -15,9 +15,9 @@ library(dplyr)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 date = substr(date(),5,10)
-date_ind = "Jul 26"
+date_ind = "May 13"
 mics_date <- "Nov 29"
-dhs_date <- "Nov 29"
+dhs_date <- "May 13"
 
 location <- "/Users/EWilson/Desktop/DAC/Delivery"
 setwd(location)
@@ -67,7 +67,6 @@ data_master$first.time.mother[data_master$first.time.mother==0] <- "no"
 data_master$first.time.mother[data_master$first.time.mother==1] <- "yes"
 table(data_master$first.time.mother, exclude=NULL)
 
-########################################################### INDIVIDUAL LEVEL
 # parse facility level and score into variables for each level
 data_master$faclevel0 <- 0
 data_master$faclevel0[data_master$faclevel==0]<-1
@@ -100,11 +99,10 @@ data_master <- data_master %>% filter(country!='SouthAfrica' | v023 != 17) # Onl
 data_master <- data_master %>% filter(country!='India' | v023 %!in% c(241,32221,3261,63221,8731,89821)) # Only 1 PSU in this cluster which is problem for svyby
 dim(data_master)
 
-# write.csv(data_master,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_data.ind.csv"))
+write.csv(data_master,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_data.ind.csv"))
 
-########################################################### SURVEY-WEIGHTED COUNTRY ESTIMATES 
-############################# CASCADE INDICATORS
-function(){
+########################################################### SURVEY-WEIGHTED ESTIMATES, COUNTRY
+########################################################### CASCADE INDICATORS
 indicators <- c("hf","hf_sba","hf_sba_24hr","hf_sba_24hr_check")
 indiclist = list()
 datalist = list()
@@ -167,27 +165,19 @@ for(k in 1:length(sort(unique(data_country_cascade$country)))){
   
 }
 
-
-
 svy_data = do.call(rbind, datalist)
 svy_data
 sort(unique(svy_data$country))
 write.csv(svy_data,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_data_country_cascade.svy.csv"), row.names = FALSE)
 
-}
-############################# STANDARD INDICATORS
+
+########################################################### STANDARD INDICATORS
 
 indicators <- c('sba','ideliv','sbaORideliv','ideliv24hr','pncwm','faclevel','faclevel0','faclevel1','faclevel2','score','score0','score1','score2','score3','score4','score5','qcov')
 indiclist = list()
 datalist = list()
 
 sort(unique(data_master$country))
-
-##
-#datbkup <- data_master
-# data_master <- subset(datbkup,country=="India")
-# dim(data_master)
-##
 
 for(k in 1:length(sort(unique(data_master$country)))){
   data <- subset(data_master, country %in% sort(unique(data_master$country))[k])
@@ -224,7 +214,7 @@ sort(unique(svy_data$country))
 write.csv(svy_data,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_data.svy.csv"), row.names = FALSE)
 
 
-########################################################### SURVEY-WEIGHTED COUNTRY ESTIMATES STRATIFIED
+########################################################### STRATIFIED BY WEALTH AND SCORE
 indicators <- c('score','qcov')
 # covariates <- c('wealth','urban.rural','age','education','marital.status','first.time.mother','region')
 covariates <- c('wealth')
@@ -286,8 +276,8 @@ write.csv(strat_svy_data,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",d
 
 
 
-
-########################################################### SURVEY-WEIGHTED POOLED
+########################################################### SURVEY-WEIGHTED ESTIMATES, POOLED
+########################################################### CASCADES
 data_master <- read.csv(paste0(location,"/Results/",date_ind,"_data.ind.csv"))
 table(data_master$ideliv, data_master$faclevel, exclude=NULL)
 
@@ -311,9 +301,11 @@ data_master$stage[data_master$mmr>=20 & data_master$mmr<100]<-4
 data_master$stage[data_master$mmr<20]<-5
 
 data_master <- subset(data_master, !is.na(stage))
-unique(data_master$country)
 table(data_master$ideliv, exclude=NULL) 
-# data_master <- subset(data_master, !is.na(ideliv))
+data_master <- subset(data_master, !is.na(ideliv))
+
+unique(data_master$country)
+
 data_master$pop <- 1
 
 # count n for each country
@@ -343,9 +335,7 @@ all_data$v001 <- 1
 all_data$pooled_strata <- paste0(all_data$num, all_data$v023)
 all_data$pooled_caseid <- paste0(all_data$num, all_data$caseid)
 
-
-
-#### POOLED ESTIMATES FOR CASCADES ###########
+########################################################### POOLED TOTAL, LOWER-LEVEL, HOSPITAL
 
 indiclist_all = list()
 indiclist_faclevel1 = list()
@@ -402,9 +392,6 @@ for(i in 1:length(indicators)){
 pooled_svy_combined = do.call(rbind, indiclist_all)
 pooled_svy_combined
 
-
-
-
 # CASCADE LOWER-LEVEL FACILITY BIRTHS
 data <- all_data
 head(data)
@@ -446,9 +433,6 @@ for(i in 1:length(indicators)){
 pooled_svy_faclevel1 = do.call(rbind, indiclist_faclevel1)
 pooled_svy_faclevel1
 
-
-
-
 # CASCADE HOSPITAL BIRTHS
 data <- all_data
 head(data)
@@ -488,11 +472,8 @@ for(i in 1:length(indicators)){
 pooled_svy_faclevel2 = do.call(rbind, indiclist_faclevel2)
 pooled_svy_faclevel2
 
-
-
-
-
 ###################################### FIGURE 4
+
 indiclist_stage = list()
 datalist = list()
 indicators <- c("hf","hf_sba","hf_sba_24hr","hf_sba_24hr_check")
@@ -555,26 +536,7 @@ write.csv(pooled_svy_data,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",
 
 
 
-
-
-
-
-
-
-End.time <- Sys.time()
-Run.time <- Start.time - End.time
-
-Run.time
-
-
-
-
-
-
-# MOVED FROM LINE 347
-
-function(){
-  
+###################################### FIGURE 1 median value
   
   # POOLED VALUE FOR EACH INDICATOR
   indiclist_std_all = list()
@@ -583,6 +545,7 @@ function(){
   
   # FIGURE 1 POOLED AVERAGE
   data <- all_data
+  data <- subset(data, !is.na(data$ideliv))
   head(data)
   dim(data)
   
@@ -610,41 +573,51 @@ function(){
   
   
   ########## raw rates for pooled data - why are weighted lower-level and hospital numbers the same even though there are more hospital births by raw numbers
-  fac0 <- subset(data, faclevel==0)
-  fac1 <- subset(data, faclevel==1)
-  fac2 <- subset(data, faclevel==2)
-  summary(fac0$adj_sw)
-  summary(fac1$adj_sw)
-  summary(fac2$adj_sw)
+  # fac0 <- subset(data, faclevel==0)
+  # fac1 <- subset(data, faclevel==1)
+  # fac2 <- subset(data, faclevel==2)
+  # summary(fac0$adj_sw)
+  # summary(fac1$adj_sw)
+  # summary(fac2$adj_sw)
+  # 
+  # country_faclevel <- as.data.frame.matrix(table(data$country, data$faclevel))
+  # country_faclevel$country <- row.names(country_faclevel)
+  # all_data_collapse <- as.data.frame(all_data %>% group_by(country,prop_pooled) %>% summarise(n = n()))
+  # country_faclevel_prop <- merge(country_faclevel, all_data_collapse, by=c("country"))
+  # head(country_faclevel_prop)
+  # # write.csv(country_faclevel_prop,"/Users/EWilson/Desktop/DAC/Delivery/Results/country_faclevel_prop.csv", row.names = FALSE)
+  # 
+  # svydata <- svydesign(id=~pooled_caseid,strata=~pooled_strata, data=data, weights=~v001, nest=TRUE) # including strata affects standard error only, not estimate
+  # 
+  # for(i in 1:length(indicators)){
+  #   denom <- sum(table(data[[indicators[i]]]))
+  #   indic <-svyby(make.formula(indicators[i]), ~v001 ,svydata, svymean, na.rm=TRUE) 
+  #   indic$n <- denom
+  #   indic$CIL <- indic[,2] - 1.96*indic[,3]
+  #   indic$CIU <- indic[,2] + 1.96*indic[,3]
+  #   
+  #   indic$indicator <- indicators[i]
+  #   indic$level <- "pooled standard"
+  #   names(indic)[names(indic) == indicators[i]] <- 'value'
+  #   indic <- indic[,c("indicator","n","level","value","se","CIL","CIU")]
+  #   
+  #   print(indic)
+  #   indiclist_std_all[[i]] <- indic
+  # }
+  # pooled_standard_raw_combined = do.call(rbind, indiclist_std_all)
+  # write.csv(pooled_standard_raw_combined,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_pooled_standard_data.raw.csv"), row.names = FALSE)
   
-  country_faclevel <- as.data.frame.matrix(table(data$country, data$faclevel))
-  country_faclevel$country <- row.names(country_faclevel)
-  all_data_collapse <- as.data.frame(all_data %>% group_by(country,prop_pooled) %>% summarise(n = n()))
-  country_faclevel_prop <- merge(country_faclevel, all_data_collapse, by=c("country"))
-  head(country_faclevel_prop)
-  write.csv(country_faclevel_prop,"/Users/EWilson/Desktop/DAC/Delivery/Results/country_faclevel_prop.csv", row.names = FALSE)
-  
-  svydata <- svydesign(id=~pooled_caseid,strata=~pooled_strata, data=data, weights=~v001, nest=TRUE) # including strata affects standard error only, not estimate
-  
-  for(i in 1:length(indicators)){
-    denom <- sum(table(data[[indicators[i]]]))
-    indic <-svyby(make.formula(indicators[i]), ~v001 ,svydata, svymean, na.rm=TRUE) 
-    indic$n <- denom
-    indic$CIL <- indic[,2] - 1.96*indic[,3]
-    indic$CIU <- indic[,2] + 1.96*indic[,3]
-    
-    indic$indicator <- indicators[i]
-    indic$level <- "pooled standard"
-    names(indic)[names(indic) == indicators[i]] <- 'value'
-    indic <- indic[,c("indicator","n","level","value","se","CIL","CIU")]
-    
-    print(indic)
-    indiclist_std_all[[i]] <- indic
-  }
-  pooled_standard_raw_combined = do.call(rbind, indiclist_std_all)
-  write.csv(pooled_standard_raw_combined,paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/",date,"_pooled_standard_data.raw.csv"), row.names = FALSE)
-  
-}
+
+
+
+
+
+
+End.time <- Sys.time()
+Run.time <- Start.time - End.time
+
+Run.time
+
 
 
 

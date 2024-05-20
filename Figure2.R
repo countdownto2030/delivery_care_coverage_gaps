@@ -1,5 +1,5 @@
-# last edited 16 Feb 2024
-# last run 16 Feb 2024
+# last edited 13 May 2024
+# last run 13 May 2024
 # Objective: get Figure2
 
 rm(list=ls())
@@ -19,7 +19,7 @@ library(reshape2)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 # date = substr(date(),5,10)
-date = "Jun 26"
+date = "May 13"
 # svy.date <- "Jul 21" 
 # svy.strat.date <- "Jul 21" 
 location <- "/Users/EWilson/Desktop/DAC/Delivery"
@@ -102,7 +102,7 @@ IQR(data$value)
 # Fig2 <- ggdraw(plot_grid(plot_partA, plot_partB, nrow=1, rel_widths = c(4,1)))
 Fig2 <- plot_grid(plot_partA, plot_partB, align="hv", rel_widths=c(5,1))
 Fig2
-ggsave(plot=Fig2, height = 7 , width = 14 , "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure2.png")
+ggsave(plot=Fig2, height = 7, width = 14, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure2.png")
 
 
 

@@ -1,7 +1,7 @@
 #******************************************************************#
 #   Creating Delivery Indicators from DHS 7/8 
 #         COUNTDOWN TO 2030 
-#         VER. 13 MAY 2024
+#         VER. 29 Nov 2022
 #******************************************************************#
 options(echo=F)
 
@@ -41,7 +41,7 @@ dhs <- dhs_full #temp
 # index=1 # temp (non-loop)
 
 
-indicators= c("sba","faclevel","ideliv","sbaORideliv","ideliv24hr","pncwm","score")
+indicators= c("sba","faclevel","ideliv","sbaORideliv","ideliv24hr","pncwm","pncwm1","score")
 covariates <- c('wealth','urban.rural','age','education','marital.status','first.time.mother','region')
 
 
@@ -418,7 +418,7 @@ for(index in 1:nrow(dhs) )  { # start DHS loop
   dat$pncwm=NA
   
   if ( v!="dhs6" & (dhs$country[index]!="Afghanistan")) {
-    dat$pncwm[ !(is.na(dat$m63)) | !(is.na(dat$m67))] <- 0
+    dat$pncwm[ !(is.na(dat$m63)) & !(is.na(dat$m67))] <- 0
     dat$pncwm[(dat$m63 <= 201 & dat$ideliv==1)] <- 1 # facility births checked at facility <2 days after delivery
     dat$pncwm[(dat$m67 <= 201 & dat$ideliv==0)] <- 1 # home births checked <2 days after delivery
     dat$pncwm[(dat$m67 <= 201 & dat$ideliv==1)] <- 1 # facility births checked at home <2 days after delivery
@@ -427,6 +427,21 @@ for(index in 1:nrow(dhs) )  { # start DHS loop
     dat$pncwm[dat$m63 >= 998 & dat$ideliv==1] <- 0 # DK responses (facility births)
     dat$pncwm[(dat$m67 >=998 & dat$ideliv==0)] <- 0 # DK responses (home births)
   }
+
+  ############ PNCWM1
+  dat$pncwm1=NA
+  
+  if ( v!="dhs6" & (dhs$country[index]!="Afghanistan")) {
+    dat$pncwm1[ !(is.na(dat$m63)) | !(is.na(dat$m67))] <- 0
+    dat$pncwm1[(dat$m63 <= 201 & dat$ideliv==1)] <- 1 # facility births checked at facility <2 days after delivery
+    dat$pncwm1[(dat$m67 <= 201 & dat$ideliv==0)] <- 1 # home births checked <2 days after delivery
+    dat$pncwm1[(dat$m67 <= 201 & dat$ideliv==1)] <- 1 # facility births checked at home <2 days after delivery
+    
+    # Set don't know responses to zero- don't drop from data set
+    dat$pncwm1[dat$m63 >= 998 & dat$ideliv==1] <- 0 # DK responses (facility births)
+    dat$pncwm1[(dat$m67 >=998 & dat$ideliv==0)] <- 0 # DK responses (home births)
+  }
+  ############ PNCWM1
   
   # DHS6 recode files used different variables for pncwm
   # Afghanistan is recorded as a phase 7 recode file, but variable for pncwm matches that of dhs phase 6 recode
@@ -521,7 +536,7 @@ master <- rbind(Afghanistan,Albania,Angola,Armenia,Benin,Burundi,Cameroon,
                 Kenya,Liberia,Malawi,Maldives,Mali,Mauritania,Myanmar,Nigeria,Pakistan,Philippines,
                 Rwanda,Senegal,SierraLeone,SouthAfrica,Tajikistan,Tanzania,TimorLeste,Uganda,Zambia)
 
-export_fi <- paste0("delivery_indicators.dhs_",date,".csv")
+export_fi <- paste0("delivery_indicators.dhs_CHECK.csv")
 
 write_csv(master,paste0(export_location,export_fi))
 

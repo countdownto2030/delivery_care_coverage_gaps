@@ -1,5 +1,5 @@
-# last edited 16 Feb 2024
-# last run 16 Feb 2024
+# last edited 13 May 2024
+# last run 13 May 2024
 # Objective: get Figure4
 
 rm(list=ls())
@@ -19,7 +19,7 @@ library(gridExtra)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 # date = substr(date(),5,10)
-date <- "Sep 17"
+date <- "May 13"
 location <- "/Users/EWilson/Desktop/DAC/Delivery"
 # setwd(location)
 
@@ -120,7 +120,7 @@ cascade_1 <- cascades[[1]] + theme(legend.position='none')
 
 cascade_facet <- plot_grid(cascade_1,cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],legend_cascade,nrow=1,rel_widths = c(1.2,1,1,1,1,.8)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
-ggsave(plot=cascade_facet, height = 7 , width = 13 , paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure4.png"))
+ggsave(plot=cascade_facet, height = 7, width = 13,  dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure4.png"))
 
 
 

@@ -1,5 +1,5 @@
-# last edited 16 Feb 2024
-# last run 16 Feb 2024
+# last edited 13 May 2024
+# last run 13 May 2024
 # Objective: get figures for survey-weighted and stratified results
 
 rm(list=ls())
@@ -19,7 +19,7 @@ library(reshape2)
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
 # date = substr(date(),5,10)
-date = "Jun 26"
+date = "May 13"
 # svy.date <- "Jul 21" 
 # svy.strat.date <- "Jul 21" 
 location <- "/Users/EWilson/Desktop/DAC/Delivery"
@@ -93,7 +93,7 @@ graph_association <- ggplot(data,aes(x=value,y=mmr)) +
   
 graph_association
 
-ggsave(plot=graph_association, height = 5 , width = 5 , "/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS3.png")
+ggsave(plot=graph_association, height = 5, width = 5, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS3.png")
 
 
 
