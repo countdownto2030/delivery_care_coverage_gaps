@@ -24,6 +24,11 @@ colnames(data)
 table(data$country,data$indicator)
 unique(data$indicator)
 
+head(data)
+data$value <- ifelse(data$indicator == "score", data$value*20/100, data$value)
+data$CIL <- ifelse(data$indicator == "score", data$CIL*20/100, data$CIL)
+data$CIU <- ifelse(data$indicator == "score", data$CIU*20/100, data$CIU)
+
 class(data$country)
 data$id <- paste0(data$indicator)
 
@@ -51,6 +56,7 @@ df<- df[,order(names(df))]
 df <- df %>% select(country, everything())
 
 colnames(df)
+
 ############# format sig digits
 dim(df)
 df <- cbind(df[,1],df[,2:ncol(df)])
@@ -64,7 +70,8 @@ mins$country <- "Min"
 maximums <- as.data.frame(t(apply(df[,2:ncol(df)], 2, FUN = max, na.rm=TRUE))) 
 maximums$country <- "Max"
 
-summary <- rbind(medians, mins, maximums)
+# summary <- rbind(medians, mins, maximums)
+summary <- rbind(mins, maximums)
 summary <- summary %>% select(country, everything())
 
 df <- rbind(df,summary) 
@@ -82,8 +89,11 @@ tail(df)
 dim(df)
 
 df1 <- df[,1]
+ncol(df)
 df2 <- 100*df[,2:(ncol(df)-6)]
-df3 <- df[,(ncol(df)-5):ncol(df)]
+# df2 <- 100*df[,2:ncol(df)]
+df3 <- 100*df[,(ncol(df)-2):ncol(df)]
+
 df <- cbind(df1,df2,df3)
 names(df)[names(df)=="df1"]<-"country"
 head(df)
@@ -193,9 +203,9 @@ df$`score5.CIU` <- NULL
 df$`score CI` <- paste0("[",df$`score.CIL`,", ",df$`score.CIU`,"]")
 df$`score.CIL` <- NULL
 df$`score.CIU` <- NULL
-df$`faclevel CI` <- paste0("[",df$`faclevel.CIL`,", ",df$`faclevel.CIU`,"]")
-df$`faclevel.CIL` <- NULL
-df$`faclevel.CIU` <- NULL
+# df$`faclevel CI` <- paste0("[",df$`faclevel.CIL`,", ",df$`faclevel.CIU`,"]")
+# df$`faclevel.CIL` <- NULL
+# df$`faclevel.CIU` <- NULL
 
 
 
@@ -214,6 +224,25 @@ df[(dim(df)[1]-1):dim(df)[1],odd_indexes] <- ""
 df[ df == "NaN" ] <- "NA"
 df[ df == "[NaN, NaN]" ] <- "[NA, NA]"
 
+names(df)[names(df)=="faclevel0"] <- "home_birth"
+names(df)[names(df)=="faclevel0 CI"] <- "home_birth CI"
+names(df)[names(df)=="faclevel1"] <- "lower_level"
+names(df)[names(df)=="faclevel1 CI"] <- "lower_level CI"
+names(df)[names(df)=="faclevel2"] <- "hospital"
+names(df)[names(df)=="faclevel2 CI"] <- "hospital CI"
+
+names(df)[names(df)=="ideliv"] <- "facility_delivery"
+names(df)[names(df)=="ideliv CI"] <- "facility_delivery CI"
+names(df)[names(df)=="sbaORideliv"] <- "sba_or_facility_delivery"
+names(df)[names(df)=="sbaORideliv CI"] <- "sba_or_facility_delivery CI"
+names(df)[names(df)=="ideliv24hr"] <- "24hr+ stay"
+names(df)[names(df)=="ideliv24hr CI"] <- "24hr+ stay CI"
+names(df)[names(df)=="pncwm"] <- "health_check_2d"
+names(df)[names(df)=="pncwm CI"] <- "health_check_2d CI"
+names(df)[names(df)=="score"] <- "delivery_care"
+names(df)[names(df)=="score CI"] <- "delivery_care CI"
+
+head(df)
 write.csv(df,"/Users/EWilson/Desktop/DAC/Delivery/Results/TableS1.csv",row.names = FALSE)
 
 # df2 = subset(df, select = c(country, score,`score CI`) )
