@@ -1,5 +1,5 @@
-# last edited 13 May 2024
-# last run 13 May 2024
+# last edited 3 Jul 2024
+# last run 3 Jul 2024
 # Objective: get figures for survey-weighted and stratified results
 
 rm(list=ls())
@@ -93,7 +93,7 @@ graph_association <- ggplot(data,aes(x=value,y=mmr)) +
   
 graph_association
 
-ggsave(plot=graph_association, height = 5, width = 5, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS3.png")
+ggsave(plot=graph_association, height = 5, width = 5, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS3.jpeg")
 
 
 

@@ -1,5 +1,5 @@
-# last edited 13 May 2024
-# last run 13 May 2024
+# last edited 3 Jul 2024
+# last run 3 Jul 2024
 # Objective: get Figure1
 
 rm(list=ls())
@@ -204,7 +204,7 @@ graph_wt_scaled_score
 
 
 Fig1 <- ggdraw(plot_grid(plot_grid(graph_facility, graph_indicator, graph_score, graph_wt_scaled_score, nrow=1, rel_widths = c(1,1,1,.4))))
-ggsave(plot=Fig1, height = 7 , width = 14, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure1.png")
+ggsave(plot=Fig1, height = 7 , width = 14, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure1.jpeg")
 
 
 

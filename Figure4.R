@@ -1,5 +1,5 @@
-# last edited 13 May 2024
-# last run 13 May 2024
+# last edited 3 Jul 2024
+# last run 3 Jul 2024
 # Objective: get Figure4
 
 rm(list=ls())
@@ -25,7 +25,7 @@ location <- "/Users/EWilson/Desktop/DAC/Delivery"
 
 ########################################################### GET DATA FILES
 # data_master <- read.csv(paste0(location,"/Results/Sep 29_pooled_data.svy.csv"))
-data_master <- read.csv(paste0(location,"/Results/Mar  1_pooled_data.svy.csv"))
+data_master <- read.csv(paste0(location,"/Results/May 13_pooled_data.svy.csv"))
 
 head(data_master)
 
@@ -120,7 +120,7 @@ cascade_1 <- cascades[[1]] + theme(legend.position='none')
 
 cascade_facet <- plot_grid(cascade_1,cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],legend_cascade,nrow=1,rel_widths = c(1.2,1,1,1,1,.8)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
-ggsave(plot=cascade_facet, height = 7, width = 13,  dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure4.png"))
+ggsave(plot=cascade_facet, height = 7, width = 13,  dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure4.jpeg"))
 
 
 

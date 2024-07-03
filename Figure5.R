@@ -1,5 +1,5 @@
-# last edited 13 May 2024
-# last run 13 May 2024
+# last edited 3 Jul 2024
+# last run 3 Jul 2024
 # Objective: get figures for survey-weighted and stratified results
 
 rm(list=ls())
@@ -213,4 +213,4 @@ my.title <- c("MMR: <20\n      mean gap: 5pp")
 
   mmr <- plot_grid(mmr1,mmr2,mmr3,mmr4,mmr5,ncol=5, align='h',rel_widths = c(.7,1.2,1.1,1,1)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
-  ggsave(plot=mmr, height = 7.5, width = 13, dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure5.png"))
+  ggsave(plot=mmr, height = 7.5, width = 13, dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure5.jpeg"))

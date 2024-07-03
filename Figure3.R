@@ -1,5 +1,5 @@
-# last edited 13 May 2024
-# last run 13 May 2024
+# last edited 3 Jul 2024
+# last run 3 Jul 2024
 # Objective: get Figure3
 
 rm(list=ls())
@@ -26,7 +26,7 @@ location <- "/Users/EWilson/Desktop/DAC/Delivery"
 
 ########################################################### GET DATA FILES
 # data_master <- read.csv(paste0(location,"/Results/Sep 29_pooled_data.svy.csv"))
-data_master <- read.csv(paste0(location,"/Results/Mar  1_pooled_data.svy.csv"))
+data_master <- read.csv(paste0(location,"/Results/May 13_pooled_data.svy.csv"))
 head(data_master)
 
 ############################################################ CURRENT VERSION (WEIGHTED)
@@ -168,7 +168,7 @@ cascade_A <- cascadeA + theme(legend.position='none')
 
 cascade <- plot_grid(cascade_A,cascadeB,cascadeC,legend_cascade,ncol=4, align='h',rel_widths = c(1.2,1,1,.5)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
-ggsave(plot=cascade, height = 7, width = 13, dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure3.png"))
+ggsave(plot=cascade, height = 7, width = 13, dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/Figure3.jpeg"))
 
 
 

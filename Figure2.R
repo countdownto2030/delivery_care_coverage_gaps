@@ -1,5 +1,5 @@
-# last edited 13 May 2024
-# last run 13 May 2024
+# last edited 3 Jul 2024
+# last run 3 Jul 2024
 # Objective: get Figure2
 
 rm(list=ls())
@@ -102,7 +102,7 @@ IQR(data$value)
 # Fig2 <- ggdraw(plot_grid(plot_partA, plot_partB, nrow=1, rel_widths = c(4,1)))
 Fig2 <- plot_grid(plot_partA, plot_partB, align="hv", rel_widths=c(5,1))
 Fig2
-ggsave(plot=Fig2, height = 7, width = 14, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure2.png")
+ggsave(plot=Fig2, height = 7, width = 14, dpi = 300, "/Users/EWilson/Desktop/DAC/Delivery/Results/Figure2.jpeg")
 
 
 

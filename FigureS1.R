@@ -1,5 +1,5 @@
-# last edited 13 May 2024
-# last run 13 May 2024
+# last edited 3 Jul 2024
+# last run 3 Jul 2024
 # Objective: get supplementary figure 1
 
 rm(list=ls())
@@ -128,7 +128,7 @@ for(i in 1:length(sort(unique(data_master$stage)))){
 # cascade_facet <- plot_grid(cascade_1,cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],legend_cascade,nrow=1,align='hv',rel_widths = c(.7,1.2,1.2,1.2,.4,.4)) +
 cascade_facet <- plot_grid(cascades[[1]],cascades[[2]],cascades[[3]],cascades[[4]],cascades[[5]],nrow=1,align='h',rel_widths = c(.5,1.3,1.1,1.3,1)) +
   theme(plot.background = element_rect(fill = "white", colour = NA))
-ggsave(plot=cascade_facet, height = 5, width = 13, dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS1.png"))
+ggsave(plot=cascade_facet, height = 5, width = 13, dpi = 300, paste0("/Users/EWilson/Desktop/DAC/Delivery/Results/FigureS1.jpeg"))
 
 
 
